@@ -1,38 +1,28 @@
 # SHARP
-Algorithms for human activity recognition with a commercial IEEE 802.11ac router @ 5 GHz, 80 MHz of bandwidth.
+Algorithms for human activity recognition (HAR) with a commercial IEEE 802.11ax router @ 5 GHz, 160 MHz of bandwidth.
 
-This repository contains the reference code for the article [''SHARP: Environment and Person Independent Activity Recognition with Commodity IEEE 802.11 Access Points''](https://ieeexplore.ieee.org/document/9804861).
+**Note:** This is a fork of the [SHARP](https://github.com/francescamen/SHARP) repository that has been adapted to work with large CSI datasets based on 802.11ax frames with 160 MHz of bandwidth.
 
-If you find the project useful and you use this code, please cite our article:
-```
-@article{meneghello2022sharp,
-  author={Meneghello, Francesca and Garlisi, Domenico and Dal Fabbro, Nicol\o' and Tinnirello, Ilenia and Rossi, Michele},
-  journal={IEEE Transactions on Mobile Computing}, 
-  title={{SHARP: Environment and Person Independent Activity Recognition with Commodity IEEE 802.11 Access Points}}, 
-  year={2023},
-  volume={22},
-  number={10},
-  pages={6160-6175}
-  }
-```
+The original SHARP code has been used in the article [''SHARP: Environment and Person Independent Activity Recognition with Commodity IEEE 802.11 Access Points''](https://ieeexplore.ieee.org/document/9804861).
+
+Instead, this repository contains the reference code for the article [''Exposing the CSI: A Systematic Investigation of CSI-based Wi-Fi Sensing Capabilities and Limitations''](https://ieeexplore.ieee.org/document/10099368).
+The corresponding dataset is available [here](https://github.com/ansresearch/exposing-the-csi).
 
 ## How to use
 Clone the repository and enter the folder with the python code:
 ```bash
 cd <your_path>
-git clone https://github.com/francescamen/SHARP
+git clone https://github.com/ansresearch/SHARP
 ```
 
-Download the input data from http://researchdata.cab.unipd.it/id/eprint/624 and unzip the file.
-For your convenience, you can use the ```input_files``` inside this project folder to place the files but the scripts work whatever is the source folder.
+[Download the input data](https://github.com/ansresearch/exposing-the-csi).
 
-The dataset contains Wi-Fi channel frequency response (CFR) data collected in an IEEE 802.11ac network through [NEXMON CSI](https://github.com/seemoo-lab/nexmon_csi). 
-The information is collected by a monitor node (ASUS RT-AC86U router) while two terminals are exchanging traffic in channel 42 (5.21 GHz for the center frequency and 80 MHz of bandwidth) and a person acts as an obstacle for the transmission by performing different activities. 
-The considered movements are the following: walking (W) or running (R) around, jumping (J) in place, sitting (L) or standing (S) somewhere in the room, sitting down and standing up (C) continuously, and doing arm gym (H).
-The CFR data for the empty room (E) is also provided. We obtained data from three volunteers, a male, and two females.
-The complete description of the dataset can be found in the reference paper.
+The dataset contains Wi-Fi channel frequency response (CFR) data collected in an IEEE 802.11ax network through [AX-CSI](https://ans.unibs.it/assets/documents/axcsi.pdf).
+The information is collected by multiple monitor nodes (ASUS RT-AX86U router) while another node is injecting traffic in channel 157 (160 MHz of bandwidth) and a person acts as an obstacle for the transmission by performing different activities. 
 
 The code for SHARP is implemented in Python and can be found in the ```Python_code``` folder inside this repository. The scripts to perform the processing are described in the following, together with the specific parameters.
+
+The following steps are the same as in the original SHARP code.
 
 ### Phase sanitization
 The following three scripts encode the phase sanitization algorithm detailed in Section 3.1 of the referred article.
@@ -123,8 +113,3 @@ Numpy >= 1.19.5
 Scipy = 1.4.1  
 Scikit-learn = 0.23.2  
 OSQP >= 0.6.1
-
-## Contact
-Francesca Meneghello
-meneghello@dei.unipd.it
-github.com/francescamen
