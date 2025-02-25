@@ -1,5 +1,5 @@
-
 """
+    Copyright (C) 2022 Marco Cominelli <marco.cominelli@unibs.it>
     Copyright (C) 2022 Francesca Meneghello
     contact: meneghello@dei.unipd.it
     This program is free software: you can redistribute it and/or modify
@@ -103,6 +103,13 @@ if __name__ == '__main__':
                     selected_subcarriers_idxs = np.arange(188, 245, 1)
                 num_selected_subcarriers = selected_subcarriers_idxs.shape[0]
                 csi_matrix_complete = csi_matrix_complete[:, selected_subcarriers_idxs]
+            elif bandwidth == 80:
+                # Skip sub_band selection
+                selected_subcarriers_idxs = np.arange(0, 243, 1)
+                num_selected_subcarriers = selected_subcarriers_idxs.shape[0]
+                csi_matrix_complete = csi_matrix_complete[:, selected_subcarriers_idxs]
+
+            print(csi_matrix_complete.shape)
 
             csi_d_profile_list = []
             for i in range(0, csi_matrix_complete.shape[0]-num_symbols, sliding):

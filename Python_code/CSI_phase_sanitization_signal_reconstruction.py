@@ -68,14 +68,17 @@ if __name__ == '__main__':
 
         end_H = H_est.shape[1]
         H_est = H_est[:, args.start_idx:end_H-args.end_idx]
-        F_frequency = 256
+        #F_frequency = 256
+        F_frequency = 2048
         csi_matrix_processed = np.zeros((H_est.shape[1], F_frequency, 2))
 
         # AMPLITUDE
-        csi_matrix_processed[:, 6:-5, 0] = np.abs(H_est[6:-5, :]).T
+        #csi_matrix_processed[:, 6:-5, 0] = np.abs(H_est[6:-5, :]).T
+        csi_matrix_processed[:, 12:-11, 0] = np.abs(H_est[12:-11, :]).T
 
         # PHASE
-        phase_before = np.unwrap(np.angle(H_est[6:-5, :]), axis=0)
+        # phase_before = np.unwrap(np.angle(H_est[6:-5, :]), axis=0)
+        phase_before = np.unwrap(np.angle(H_est[12:-11, :]), axis=0)
         phase_err_tot = np.diff(phase_before, axis=1)
         ones_vector = np.ones((2, phase_before.shape[0]))
         ones_vector[1, :] = np.arange(0, phase_before.shape[0])
@@ -112,7 +115,9 @@ if __name__ == '__main__':
             temp2 = np.linalg.lstsq(ones_vector.T, error)[0]
             phase_before[:, tidx] = phase_before[:, tidx] - (np.dot(ones_vector.T, temp2)).T
 
-        csi_matrix_processed[:, 6:-5, 1] = phase_before.T
+        #csi_matrix_processed[:, 6:-5, 1] = phase_before.T
+        csi_matrix_processed[:, 12:-11, 1] = phase_before.T
 
-        mdic = {"csi_matrix_processed": csi_matrix_processed[:, 6:-5, :]}
+        # mdic = {"csi_matrix_processed": csi_matrix_processed[:, 6:-5, :]}
+        mdic = {"csi_matrix_processed": csi_matrix_processed[:, 12:-11, :]}
         sio.savemat(name_file_save, mdic)

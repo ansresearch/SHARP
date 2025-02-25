@@ -1,5 +1,5 @@
-
 """
+    Copyright (C) 2022 Marco Cominelli <marco.cominelli@unibs.it>
     Copyright (C) 2022 Francesca Meneghello
     contact: meneghello@dei.unipd.it
     This program is free software: you can redistribute it and/or modify
@@ -46,9 +46,13 @@ if __name__ == '__main__':
     parser.add_argument('nss', help='Number of spatial streams', type=int)
     parser.add_argument('ncore', help='Number of cores', type=int)
     parser.add_argument('start_idx', help='Idx where start processing for each stream', type=int)
+    parser.add_argument('bandwidth', help='bandwidth of the signal', type=int, choices={20, 40, 80, 160})
+    parser.add_argument('wifi', help='wifi standard', choices={'ac', 'ax'})
     args = parser.parse_args()
 
     exp_dir = args.dir
+    bandwidth = args.bandwidth
+    wifi = args.wifi
     names = []
 
     if args.all_dir:
@@ -74,7 +78,33 @@ if __name__ == '__main__':
         delete_idxs = np.argwhere(np.sum(csi_buff, axis=1) == 0)[:, 0]
         csi_buff = np.delete(csi_buff, delete_idxs, axis=0)
 
-        delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 127, 128, 129, 251, 252, 253, 254, 255], dtype=int)
+        # 802.11ac
+        if wifi == 'ac':
+            if bandwidth == 20:
+                csi_buff = csi_buff[..., :256:4]
+                delete_idxs = np.asarray([0, 1, 2, 3, 32, 61, 62, 63], dtype=int)
+            elif bandwidth == 40:
+                csi_buff = csi_buff[..., :512:4]
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 63, 64, 65, 123, 124, 125, 126, 127], dtype=int)
+            elif bandwidth == 80:
+                csi_buff = csi_buff[..., :1024:4]
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 127, 128, 129, 251, 252, 253, 254, 255], dtype=int)
+            elif bandwidth == 160:
+                csi_buff = csi_buff[..., ::4]
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 127, 128, 129, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 383, 384, 385, 507, 508, 509, 510, 511], dtype=int)
+        # 802.11ax
+        elif wifi == 'ax':
+            if bandwidth == 20:
+                csi_buff = csi_buff[..., :256]
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 125, 126, 127, 128, 129, 130, 131, 251, 252, 253, 254, 255], dtype=int)
+            elif bandwidth == 40:
+                csi_buff = csi_buff[..., :512]
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 254, 255, 256, 257, 258, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511], dtype=int)
+            elif bandwidth == 80:
+                csi_buff = csi_buff[..., :1024]
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 509, 510, 511, 512, 513, 514, 515, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023], dtype=int)
+            elif bandwidth == 160:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 509, 510, 511, 512, 513, 514, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1535, 1536, 1537, 1538, 1539, 2036, 2037, 2038, 2039, 2040, 2041, 2042, 2043, 2044, 2045, 2046, 2047], dtype=int)
 
         n_ss = args.nss
         n_core = args.ncore
@@ -93,6 +123,8 @@ if __name__ == '__main__':
             H_m = signal_stream/mean_signal
 
             signal_complete[:, :, stream] = H_m.T
+
+        print(signal_complete.shape)
 
         name_file = './phase_processing/signal_' + name + '.txt'
         with open(name_file, "wb") as fp:  # Pickling

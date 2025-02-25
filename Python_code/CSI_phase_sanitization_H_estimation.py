@@ -1,5 +1,5 @@
-
 """
+    Copyright (C) 2022 Marco Cominelli <marco.cominelli@unibs.it>
     Copyright (C) 2022 Francesca Meneghello
     contact: meneghello@dei.unipd.it
     This program is free software: you can redistribute it and/or modify
@@ -30,9 +30,13 @@ if __name__ == '__main__':
     parser.add_argument('ncore', help='Number of cores', type=int)
     parser.add_argument('start_r', help='Start processing', type=int)
     parser.add_argument('end_r', help='End processing', type=int)
+    parser.add_argument('bandwidth', help='bandwidth of the signal', type=int, choices={20, 40, 80, 160})
+    parser.add_argument('wifi', help='wifi standard', choices={'ac', 'ax'})
     args = parser.parse_args()
 
     exp_save_dir = args.dir
+    bandwidth = args.bandwidth
+    wifi = args.wifi
     names = []
 
     if args.all_dir:
@@ -49,8 +53,45 @@ if __name__ == '__main__':
         with open(name_file, "rb") as fp:  # Pickling
             signal_complete = pickle.load(fp)
 
-        delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 127, 128, 129, 251, 252, 253, 254, 255], dtype=int)
-        pilot_subcarriers = [25, 53, 89, 117, 139, 167, 203, 231]
+         # 802.11ac
+        if wifi == 'ac':
+            delta_f = 312.5E3
+            if bandwidth == 20:
+                delete_idxs = np.asarray([0, 1, 2, 3, 32, 61, 62, 63], dtype=int)
+                pilot_subcarriers = [11, 25, 39, 53]
+                F_frequency = 64
+            elif bandwidth == 40:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 63, 64, 65, 123, 124, 125, 126, 127], dtype=int)
+                pilot_subcarriers = [11, 39, 53, 75, 89, 117]
+                F_frequency = 128
+            elif bandwidth == 80:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 127, 128, 129, 251, 252, 253, 254, 255], dtype=int)
+                pilot_subcarriers = [25, 53, 89, 117, 139, 167, 203, 231]
+                F_frequency = 256
+            elif bandwidth == 160:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 127, 128, 129, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 383, 384, 385, 507, 508, 509, 510, 511], dtype=int)
+                pilot_subcarriers = [25, 53, 89, 117, 139, 167, 203, 231, 261, 309, 345, 373, 395, 423, 459, 487]
+                F_frequency = 512
+        # 802.11ax
+        elif wifi == 'ax':
+            delta_f = 78.125E3
+            if bandwidth == 20:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 125, 126, 127, 128, 129, 130, 131, 251, 252, 253, 254, 255], dtype=int)
+                pilot_subcarriers = [12, 26, 38, 52, 66, 80, 92, 106, 118, 138, 150, 164, 176, 190, 204, 218, 230, 244]
+                F_frequency = 256
+            elif bandwidth == 40:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 254, 255, 256, 257, 258, 501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511], dtype=int)
+                pilot_subcarriers = [25, 53, 89, 117, 139, 167, 203, 231]
+                F_frequency = 512
+            elif bandwidth == 80:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 509, 510, 511, 512, 513, 514, 515, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023], dtype=int)
+                pilot_subcarriers = [25, 53, 89, 117, 139, 167, 203, 231]
+                F_frequency = 1024
+            elif bandwidth == 160:
+                delete_idxs = np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 509, 510, 511, 512, 513, 514, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1535, 1536, 1537, 1538, 1539, 2036, 2037, 2038, 2039, 2040, 2041, 2042, 2043, 2044, 2045, 2046, 2047], dtype=int)
+                pilot_subcarriers = [18, 32, 44, 58, 72, 86, 98, 112, 126, 140, 152, 166, 178, 192, 206, 220, 232, 246, 260, 274, 286, 300, 314, 328, 340, 354, 368, 382, 394, 408, 420, 434, 448, 462, 474, 488, 502, 522, 536, 550, 562, 576, 590, 604, 616, 630, 642, 656, 670, 684, 696, 710, 724, 738, 750, 764,  778, 792, 804, 818, 832, 846, 858, 872, 884, 898, 912,  26, 938, 952, 966, 980, 992, 1006, 1042, 1056, 1068, 1082, 1096, 1110, 1122, 1136, 1150, 1164, 1176, 1190, 1202, 1216, 1230, 1244, 1256, 1270, 1284, 1298, 1310, 1324, 1338, 1352, 1364, 1378, 1392, 1406, 1418, 1432, 1444, 1458, 1472, 1486, 1498, 1512, 1526, 1546, 1560, 1574, 1586, 1600, 1614, 1628, 1640, 1654, 1666, 1680, 1694, 1708, 1720, 1734, 1748, 1762, 1774, 1788, 1802, 1816, 1828, 1842, 1856, 1870, 1882, 1896, 1908, 1922, 1936, 1950, 1962, 1976, 1990, 2004, 2016, 2030]
+                F_frequency = 2048
+
         subcarriers_space = 2
         delta_t = 1E-7
         delta_t_refined = 5E-9
@@ -63,8 +104,6 @@ if __name__ == '__main__':
         else:
             end_r = signal_complete.shape[1]
 
-        F_frequency = 256
-        delta_f = 312.5E3
         frequency_vector_complete = np.zeros(F_frequency, )
         F_frequency_2 = F_frequency // 2
         for row in range(F_frequency_2):
